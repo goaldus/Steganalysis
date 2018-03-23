@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Drawing;
 using Accord.Statistics.Testing;
 
@@ -14,10 +10,11 @@ namespace Stegoanalysis
     {
         //Chi square blocks
         private static int csSize = 1024;
+        private const double threshold = 0.0000000001;
 
         static void Main(string[] args)
         {
-            using (Stream BitmapStream = System.IO.File.Open("stegoImage.png", System.IO.FileMode.Open))
+            using (Stream BitmapStream = System.IO.File.Open("stegoImage4.png", System.IO.FileMode.Open))
             {
                 Image picture = Image.FromStream(BitmapStream);
                 var mBitmap = new Bitmap(picture);
@@ -32,7 +29,16 @@ namespace Stegoanalysis
                 {
                     totalVal += chiVal;
                 }
-                Console.WriteLine(totalVal / chi.Length);
+
+                var result = totalVal / chi.Length;
+                bool isStegoFile;
+                if (result > threshold)
+                    isStegoFile = true;
+                else
+                    isStegoFile = false;
+                Console.WriteLine(result);
+                Console.WriteLine("Obsahuje obrazek skrytou informaci? : " + isStegoFile);
+                Console.ReadKey();
 
             }
 
