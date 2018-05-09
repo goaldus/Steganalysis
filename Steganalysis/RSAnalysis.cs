@@ -39,7 +39,7 @@ using System.Drawing;
  * https://github.com/b3dk7/StegExpose/blob/master/RSAnalysis.java
  * 
  * Slightly modified and rewrote in C# by Ondrej Molnar
- * 
+ * Original code here: https://github.com/b3dk7/StegExpose/blob/master/RSAnalysis.java
  */
 
 namespace Steganalysis
