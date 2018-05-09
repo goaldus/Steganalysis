@@ -1,127 +1,79 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Drawing;
-using Accord.Statistics.Testing;
-
+using Steganalysis;
+using System;
 
 namespace Stegoanalysis
 {
     class Program
     {
-        //Chi square blocks
-        private static int csSize = 1024;
-        private const double threshold = 0.0000000001;
-
+        static readonly double threshold = 0.2;
         static void Main(string[] args)
         {
-            using (Stream BitmapStream = System.IO.File.Open("stegoImage4.png", System.IO.FileMode.Open))
+            DirectoryInfo d = new DirectoryInfo(@"scn\");
+            FileInfo[] files = d.GetFiles("*.png");
+
+            foreach (var file in files)
             {
-                Image picture = Image.FromStream(BitmapStream);
-                var mBitmap = new Bitmap(picture);
 
+                //kontrola TODO
 
-                int nBlocks = ((3 * mBitmap.Width * mBitmap.Height) / csSize) - 1;
-                double[] x = new double[nBlocks];
-                double[] chi = new double[nBlocks];
-                ChiSquareFromTopToBottom(mBitmap, x, chi, csSize);
-                double totalVal = 0;
-                foreach (double chiVal in chi)
+                using (Stream BitmapStream = System.IO.File.Open(file.FullName, System.IO.FileMode.Open))
                 {
-                    totalVal += chiVal;
+                    Image picture = Image.FromStream(BitmapStream);
+                    var mBitmap = new Bitmap(picture);
+
+                    double avg = 0;
+
+                    var ChiSquareAnalysis = new ChiSquare(picture.Width, picture.Height, mBitmap);
+                    var cs = ChiSquareAnalysis.analyze();
+                    Console.WriteLine(file.Name + " CS: " + cs);
+
+                    var SamplePairsAnalysis = new SamplePairs(picture.Width, picture.Height, mBitmap);
+                    var sp = SamplePairsAnalysis.analyze();
+                    Console.WriteLine("SP: " + sp);
+
+                    var RSAnalysis = new RSAnalysis(picture.Width, picture.Height, mBitmap, 2, 2);
+                    var rs = RSAnalysis.analyze();
+
+                    avg = (cs + sp + rs) / 3;
+                    Console.WriteLine("Prumer: " + avg);
+
+                    if (avg > threshold)
+                        Console.WriteLine("Podezrely obrazek");
+                    else
+                        Console.WriteLine("Cisty obrazek");
                 }
-
-                var result = totalVal / chi.Length;
-                bool isStegoFile;
-                if (result > threshold)
-                    isStegoFile = true;
-                else
-                    isStegoFile = false;
-                Console.WriteLine(result);
-                Console.WriteLine("Obsahuje obrazek skrytou informaci? : " + isStegoFile);
-                Console.ReadKey();
-
             }
 
         }
 
-        private static void ChiSquareFromTopToBottom(Bitmap image, double[] x, double[] chi, int size)
+        public static int getRed(int pixel)
         {
-            int width = image.Width;
-            int height = image.Height;
-            int block = 0;
-            int nBytes = 1;
-            int red, green, blue;
-            int[] values = new int[256];
-            double[] expectedValues = new double[128];
-            double[] pov = new double[128];
-            Color pixel = Color.Empty;
-
-            for (int i = 0; i < values.Length; i++)
-            {
-                values[i] = 1;
-                x[i] = i;
-            }
-
-            for (int j = 0; j < height; j++)
-            {
-                for (int k = 0; k < width; k++)
-                {
-                    if (block < chi.Length)
-                    {
-                        pixel = image.GetPixel(k, j);
-                        red = pixel.R;
-                        values[red]++;
-                        nBytes++;
-                        if (nBytes > size)
-                        {
-                            for (int i = 0; i < expectedValues.Length; i++)
-                            {
-                                expectedValues[i] = (values[2 * i] + values[2 * i + 1]) / 2;
-                                pov[i] = values[2 * i];
-                            }
-                            chi[block] = new ChiSquareTest(expectedValues, pov, 1).PValue;
-                            block++;
-                            nBytes = 1;
-                        }
-                    }
-
-                    if (block < chi.Length)
-                    {
-                        green = pixel.G;
-                        values[green]++;
-                        nBytes++;
-                        if (nBytes > size)
-                        {
-                            for (int i = 0; i < expectedValues.Length; i++)
-                            {
-                                expectedValues[i] = (values[2 * i] + values[2 * i + 1]) / 2;
-                                pov[i] = values[2 * i];
-                            }
-                            chi[block] = new ChiSquareTest(expectedValues, pov, 1).PValue;
-                            block++;
-                            nBytes = 1;
-                        }
-                    }
-
-                    if (block < chi.Length)
-                    {
-                        blue = pixel.B;
-                        values[blue]++;
-                        nBytes++;
-                        if (nBytes > size)
-                        {
-                            for (int i = 0; i < expectedValues.Length; i++)
-                            {
-                                expectedValues[i] = (values[2 * i] + values[2 * i + 1]) / 2;
-                                pov[i] = values[2 * i];
-                            }
-                            chi[block] = new ChiSquareTest(expectedValues, pov, 1).PValue;
-                            block++;
-                            nBytes = 1;
-                        }
-                    }
-                }
-            }
+            return ((pixel >> 16) & 0xff);
         }
+
+        /**
+         * Gets the green content of a pixel.
+         *
+         * @param pixel The pixel to get the green content of.
+         * @return The green content of the pixel.
+         */
+        public static int getGreen(int pixel)
+        {
+            return ((pixel >> 8) & 0xff);
+        }
+
+        /**
+         * Gets the blue content of a pixel.
+         *
+         * @param pixel The pixel to get the blue content of.
+         * @return The blue content of the pixel.
+         */
+        public static int getBlue(int pixel)
+        {
+            return (pixel & 0xff);
+        }
+
     }
 }
