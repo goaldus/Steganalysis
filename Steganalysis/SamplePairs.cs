@@ -39,6 +39,7 @@ using System.Drawing;
 * Modified by Ondrej Molnar
 * Rewrote in c# with little modifications like checking for odd size (Arguments of getPixel function has to be less than size height or width)
 * or making absolute value of result
+* Original code here: https://github.com/b3dk7/StegExpose/blob/master/SamplePairs.java
 */
 
 namespace Steganalysis
