@@ -44,7 +44,7 @@ using System.Drawing;
 
 namespace Steganalysis
 {
-    public class SamplePairs : HelperFunctions ,IDetector
+    public class SamplePairs : HelperFunctions, IDetector
     {
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -81,7 +81,7 @@ namespace Steganalysis
 
         public double analyze(Colors color)
         {
-            int u, v;
+            int u, v; // neighbour pixels
             long P = 0, X = 0, Y = 0, Z = 0, W = 0;
 
             // pairs across the image

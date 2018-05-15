@@ -38,7 +38,7 @@ using System.Drawing;
  * This code is based on Benedikt Boehm's work
  * https://github.com/b3dk7/StegExpose/blob/master/RSAnalysis.java
  * 
- * Slightly modified and rewrote in C# by Ondrej Molnar
+ * Slightly modified(computing algorithm unchanged) and rewrote in C# by Ondrej Molnar
  */
 
 namespace Steganalysis
@@ -47,6 +47,7 @@ namespace Steganalysis
     {
         public int Width { get; private set; }
         public int Height { get; private set; }
+        public int estimatedHiddenMessageLength { get; set; }
 
         private int[][] mask;
         private int maskSizeX, maskSizeY;
@@ -87,19 +88,23 @@ namespace Steganalysis
             maskSizeY = n;
         }
 
+        /// <summary>
+        /// Computes all 3 color channels.
+        /// </summary>
+        /// <returns>mean value of overlapping and nonoverlapping average</returns>
         public double analyze()
         {
             //RS analysis for overlapping groups
-            double averageOverlappingValue = (analyze(Colors.Red, true)[26] + analyze(Colors.Green, true)[26] +
-                                             analyze(Colors.Blue, true)[26]) / 3;
+            double averageOverlappingValue = (analyze(Colors.Red, true) + analyze(Colors.Green, true) +
+                                             analyze(Colors.Blue, true)) / 3;
             //RS analysis for non-overlapping groups
-            double averageNonOverlappingValue = (analyze(Colors.Red, false)[26] + analyze(Colors.Green, false)[26] +
-                                                analyze(Colors.Blue, false)[26]) / 3;
+            double averageNonOverlappingValue = (analyze(Colors.Red, false) + analyze(Colors.Green, false) +
+                                                analyze(Colors.Blue, false)) / 3;
 
             return (averageNonOverlappingValue + averageOverlappingValue) / 2;
         }
 
-        private double[] analyze(Colors color, bool overlap)
+        private double analyze(Colors color, bool overlap)
         {
             int startx = 0, starty = 0;
             Color[] block = new Color[maskSizeX * maskSizeY];
@@ -191,46 +196,46 @@ namespace Steganalysis
             else
                 ml = Math.Abs(x / (x - 0.5));
 
-            //now we have the number of regular and singular groups...
-            double[] results = new double[28];
+            ////now we have the number of regular and singular groups...
+            //double[] results = new double[28];
 
             //save them all...
 
-            //these results
-            results[0] = numregular;                                // Number of regular groups (positive)
-            results[1] = numsingular;                               // Number of singular groups (positive)
-            results[2] = numnegregular;                             // Number of regular groups (negative)
-            results[3] = numnegsingular;                            // Number of singular groups (negative)
-            results[4] = Math.Abs(numregular - numnegregular);      // Difference for regular groups
-            results[5] = Math.Abs(numsingular - numnegsingular);    // Difference for singular groups
-            results[6] = (numregular / totalgroups) * 100;          // Percentage of regular groups (positive)
-            results[7] = (numsingular / totalgroups) * 100;         // Percentage of singular groups (positive)
-            results[8] = (numnegregular / totalgroups) * 100;       // Percentage of regular groups (negative)
-            results[9] = (numnegsingular / totalgroups) * 100;      // Percentage of singular groups (negative)
-            results[10] = (results[4] / totalgroups) * 100;         // Difference for regular groups %
-            results[11] = (results[5] / totalgroups) * 100;         // Difference for singular groups %
+            ////these results
+            //results[0] = numregular;                                // Number of regular groups (positive)
+            //results[1] = numsingular;                               // Number of singular groups (positive)
+            //results[2] = numnegregular;                             // Number of regular groups (negative)
+            //results[3] = numnegsingular;                            // Number of singular groups (negative)
+            //results[4] = Math.Abs(numregular - numnegregular);      // Difference for regular groups
+            //results[5] = Math.Abs(numsingular - numnegsingular);    // Difference for singular groups
+            //results[6] = (numregular / totalgroups) * 100;          // Percentage of regular groups (positive)
+            //results[7] = (numsingular / totalgroups) * 100;         // Percentage of singular groups (positive)
+            //results[8] = (numnegregular / totalgroups) * 100;       // Percentage of regular groups (negative)
+            //results[9] = (numnegsingular / totalgroups) * 100;      // Percentage of singular groups (negative)
+            //results[10] = (results[4] / totalgroups) * 100;         // Difference for regular groups %
+            //results[11] = (results[5] / totalgroups) * 100;         // Difference for singular groups %
 
-            //all pixel results
-            results[12] = allpixels[0];                             // Number of regular groups (positive for all flipped)
-            results[13] = allpixels[1];                             // Number of singular groups (positive for all flipped)
-            results[14] = allpixels[2];                             // Number of regular groups (negative for all flipped)
-            results[15] = allpixels[3];                             // Number of singular groups (negative for all flipped)
-            results[16] = Math.Abs(allpixels[0] - allpixels[1]);    // Difference for regular groups (all flipped)
-            results[17] = Math.Abs(allpixels[2] - allpixels[3]);    // Difference for singular groups (all flipped)
-            results[18] = (allpixels[0] / totalgroups) * 100;       // Percentage of regular groups (positive for all flipped)
-            results[19] = (allpixels[1] / totalgroups) * 100;       // Percentage of singular groups (positive for all flipped)
-            results[20] = (allpixels[2] / totalgroups) * 100;       // Percentage of regular groups (negative for all flipped)
-            results[21] = (allpixels[3] / totalgroups) * 100;       // Percentage of singular groups (negative for all flipped)
-            results[22] = (results[16] / totalgroups) * 100;        // Difference for regular groups (all flipped) %
-            results[23] = (results[17] / totalgroups) * 100;        // Difference for singular groups (all flipped) %
+            ////all pixel results
+            //results[12] = allpixels[0];                             // Number of regular groups (positive for all flipped)
+            //results[13] = allpixels[1];                             // Number of singular groups (positive for all flipped)
+            //results[14] = allpixels[2];                             // Number of regular groups (negative for all flipped)
+            //results[15] = allpixels[3];                             // Number of singular groups (negative for all flipped)
+            //results[16] = Math.Abs(allpixels[0] - allpixels[1]);    // Difference for regular groups (all flipped)
+            //results[17] = Math.Abs(allpixels[2] - allpixels[3]);    // Difference for singular groups (all flipped)
+            //results[18] = (allpixels[0] / totalgroups) * 100;       // Percentage of regular groups (positive for all flipped)
+            //results[19] = (allpixels[1] / totalgroups) * 100;       // Percentage of singular groups (positive for all flipped)
+            //results[20] = (allpixels[2] / totalgroups) * 100;       // Percentage of regular groups (negative for all flipped)
+            //results[21] = (allpixels[3] / totalgroups) * 100;       // Percentage of singular groups (negative for all flipped)
+            //results[22] = (results[16] / totalgroups) * 100;        // Difference for regular groups (all flipped) %
+            //results[23] = (results[17] / totalgroups) * 100;        // Difference for singular groups (all flipped) %
 
-            //overall results
-            results[24] = totalgroups;                              // Total number of groups
-            results[25] = epf;                                      // Estimated percent of flipped pixels
-            results[26] = ml;                                       // Estimated message length (in percent of pixels)(p)
-            results[27] = ((Width * Height * 3) * ml) / 8;          // Estimated message length (in bytes)
+            ////overall results
+            //results[24] = totalgroups;                              // Total number of groups
+            //results[25] = epf;                                      // Estimated percent of flipped pixels
+            //results[26] = ml;                                       // Estimated message length (in percent of pixels)(p)
+            estimatedHiddenMessageLength = (int)((Width * Height * 3) * ml) / 8;          // Estimated message length (in bytes)
 
-            return results;
+            return ml;  // ml is percentage of pixels
         }
 
 

@@ -18,6 +18,10 @@ namespace Steganalysis
             this.image = bitmap;
         }
 
+        /// <summary>
+        /// Computes mean value of all chi blocks
+        /// </summary>
+        /// <returns></returns>
         public double analyze()
         {
             int nBlocks = ((3 * Width * Height) / chiSquareBlocks) - 1;
@@ -25,35 +29,30 @@ namespace Steganalysis
 
             int block = 0;
             int nbBytes = 1;
-            int[] values = new int[256];
+            int[] histogram = new int[256];
             double[] expected = new double[128];
             double[] observed = new double[128];
-            Color color;
+            Color pixel;
 
-            for (int i = 0; i < values.Length; i++)
+            for (int i = 0; i < histogram.Length; i++)
             {
-                values[i] = 1;
+                histogram[i] = 1;
             }
 
             for (int j = 0; j < Height; j++)
             {
                 for (int i = 0; i < Width; i++)
                 {
-                    color = image.GetPixel(i, j);
+                    pixel = image.GetPixel(i, j);
 
                     if (block < chi.Length)
                     {
-                        values[color.R]++;
+                        histogram[pixel.R]++;
                         nbBytes++;
 
                         if (nbBytes > chiSquareBlocks)
                         {
-                            for (int k = 0; k < expected.Length; k++)
-                            {
-                                expected[k] = ((values[2 * k] + values[2 * k + 1]) / 2);
-                                observed[k] = values[2 * k];
-                            }
-                            chi[block] = new ChiSquareTest(expected, observed, expected.Length - 1).PValue;
+                            chi[block] = getChiSquarePValue(histogram, expected.Length, expected, observed);
                             block++;
                             nbBytes = 1;
                         }
@@ -61,17 +60,12 @@ namespace Steganalysis
 
                     if (block < chi.Length)
                     {
-                        values[color.G]++;
+                        histogram[pixel.G]++;
                         nbBytes++;
 
                         if (nbBytes > chiSquareBlocks)
                         {
-                            for (int k = 0; k < expected.Length; k++)
-                            {
-                                expected[k] = ((values[2 * k] + values[2 * k + 1]) / 2);
-                                observed[k] = values[2 * k];
-                            }
-                            chi[block] = new ChiSquareTest(expected, observed, expected.Length - 1).PValue;
+                            chi[block] = getChiSquarePValue(histogram, expected.Length, expected, observed);
                             block++;
                             nbBytes = 1;
                         }
@@ -79,17 +73,12 @@ namespace Steganalysis
 
                     if (block < chi.Length)
                     {
-                        values[color.B]++;
+                        histogram[pixel.B]++;
                         nbBytes++;
 
                         if (nbBytes > chiSquareBlocks)
                         {
-                            for (int k = 0; k < expected.Length; k++)
-                            {
-                                expected[k] = ((values[2 * k] + values[2 * k + 1]) / 2);
-                                observed[k] = values[2 * k];
-                            }
-                            chi[block] = new ChiSquareTest(expected, observed, expected.Length - 1).PValue;
+                            chi[block] = getChiSquarePValue(histogram, expected.Length, expected, observed);
                             block++;
                             nbBytes = 1;
                         }
@@ -103,7 +92,25 @@ namespace Steganalysis
                 csQuant += val;
             }
 
-            return csQuant/chi.Length;
+            return csQuant / chi.Length;
+        }
+
+        /// <summary>
+        /// Returns p(probability) value of hidden message presence - greater value means greater probability
+        /// </summary>
+        /// <param name="histogram"></param>
+        /// <param name="pairCount"></param>
+        /// <param name="expected"></param>
+        /// <param name="observed"></param>
+        /// <returns></returns>
+        public double getChiSquarePValue(int[] histogram, int pairCount, double[] expected, double[] observed)
+        {
+            for (int k = 0; k < expected.Length; k++)
+            {
+                expected[k] = ((histogram[2 * k] + histogram[2 * k + 1]) / 2);
+                observed[k] = histogram[2 * k];
+            }
+            return new ChiSquareTest(expected, observed, expected.Length - 1).PValue;
         }
     }
 }
