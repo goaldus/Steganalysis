@@ -1,4 +1,12 @@
-﻿using Accord.Statistics.Testing;
+﻿/* 
+ *
+ * This code is based on Benedikt Boehm's work
+ * https://github.com/b3dk7/StegExpose/blob/master/RSAnalysis.java
+ *
+ * Slightly modified(computing algorithm unchanged) and rewrote in C# by Ondrej Molnar
+ */
+
+using Accord.Statistics.Testing;
 using System.Drawing;
 
 namespace Steganalysis
