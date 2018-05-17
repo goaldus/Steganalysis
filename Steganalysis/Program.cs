@@ -181,8 +181,8 @@ namespace Stegoanalysis
             Console.WriteLine("Napoveda: tato aplikace dokaze detekovat skrytou informaci v obraze. Muzete ji detekovat vizualne, tim ze si nechate " +
                 "vytvorit stejny obrazek se zvyraznenim LSB (least significant bits) nebo pomoci statistickych utoku, ktere vypisuji v pripade " +
                 "podezreleho obrazku i odhadovanou delku skryte zpravy. Nutno podotknout, ze aplikace dokaze pracovat pouze s formaty .bmp a .png.\n");
-            Console.WriteLine("Pouziti:\t-visualattack imageFileName\t\t- vytvori stejny obrazek, ale se zvyraznenim LSB");
-            Console.WriteLine("\t\t-analyze directoryName [threshold] [-r]\t- analyzuje obrazky ve slozce. Pri vlozeni hodnoty v rozmezi od\n" +
+            Console.WriteLine("Pouziti:\tvisualattack imageFileName\t\t- vytvori stejny obrazek, ale se zvyraznenim LSB");
+            Console.WriteLine("\t\tanalyze directoryName [threshold] [-r]\t- analyzuje obrazky ve slozce. Pri vlozeni hodnoty v rozmezi od\n" +
                     "\t\t\t\t\t\t\t  0 - 1 s desetinnou carkou je mozno nastavit prah. V pripade\n" +
                     "\t\t\t\t\t\t\t  prekroceni prahu, je obrazek povazovan za cover medium, ktere\n" +
                     "\t\t\t\t\t\t\t  prenasi skrytou informaci. Vychozi prah je nastaven na 0.2.\n" +
